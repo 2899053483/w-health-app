@@ -1,511 +1,472 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
-  Heart, 
-  Activity, 
-  Wind, 
-  Users, 
-  User, 
-  Play, 
-  Pause, 
-  ChevronRight, 
-  Droplets, 
-  Flame, 
-  Moon, 
-  Award,
-  Settings,
-  Bell
+  Play, Pause, ChevronRight, Activity, Volume2, 
+  User, CheckCircle, AlertCircle, ArrowLeft, Mic, Heart, Droplets, Zap
 } from 'lucide-react';
 
-// --- Components for specific Screens ---
+export default function WHealthSimple() {
+  const [currentScreen, setCurrentScreen] = useState(1);
+  const [userData, setUserData] = useState({ weight: '', height: '', steps: '' });
+  const [healthStatus, setHealthStatus] = useState(null);
 
-/**
- * 1. DASHBOARD INTERFACE
- * The central hub showing a snapshot of SDG3 goals (Physical & Mental).
- */
-const DashboardScreen = ({ setActiveTab }) => (
-  <div className="space-y-6 animate-fade-in">
-    {/* Header */}
-    <div className="flex justify-between items-center">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Good Morning, Alex</h1>
-        <p className="text-slate-500 text-sm">Let's prioritize your well-being today.</p>
-      </div>
-      <div className="relative">
-        <img 
-          src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" 
-          alt="Profile" 
-          className="w-12 h-12 rounded-full border-2 border-emerald-500 p-0.5"
-        />
-        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-      </div>
-    </div>
-
-    {/* SDG3 Health Score Card */}
-    <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
-      <div className="relative z-10">
-        <div className="flex justify-between items-start mb-4">
-          <div>
-            <p className="text-emerald-100 font-medium text-sm">W-HEALTH SCORE</p>
-            <h2 className="text-4xl font-bold">84<span className="text-xl font-normal opacity-80">/100</span></h2>
-          </div>
-          <Activity className="text-emerald-100 opacity-50 w-12 h-12" />
-        </div>
-        <p className="text-sm text-emerald-50 bg-white/20 inline-block px-3 py-1 rounded-full backdrop-blur-sm">
-          You are in the top 10% today!
-        </p>
-      </div>
-      {/* Decorative background circle */}
-      <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
-    </div>
-
-    {/* Quick Stats Grid */}
-    <div className="grid grid-cols-2 gap-4">
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center justify-center py-6" onClick={() => setActiveTab('physical')}>
-        <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-orange-600 mb-2">
-          <Flame size={20} />
-        </div>
-        <span className="text-2xl font-bold text-slate-800">1,240</span>
-        <span className="text-xs text-slate-500 uppercase tracking-wider">Calories</span>
-      </div>
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-col items-center justify-center py-6" onClick={() => setActiveTab('mental')}>
-        <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mb-2">
-          <Moon size={20} />
-        </div>
-        <span className="text-2xl font-bold text-slate-800">7h 20m</span>
-        <span className="text-xs text-slate-500 uppercase tracking-wider">Sleep</span>
-      </div>
-    </div>
-
-    {/* Suggested Action */}
-    <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-center justify-between">
-      <div className="flex items-center space-x-3">
-        <div className="bg-blue-500 text-white p-2 rounded-lg">
-          <Wind size={20} />
-        </div>
-        <div>
-          <h3 className="font-semibold text-slate-800">Breathwork Session</h3>
-          <p className="text-xs text-slate-500">5 min • Stress Relief</p>
-        </div>
-      </div>
-      <button onClick={() => setActiveTab('mental')} className="bg-white text-blue-600 px-4 py-1.5 text-sm font-medium rounded-full shadow-sm">
-        Start
-      </button>
-    </div>
-  </div>
-);
-
-/**
- * 2. PHYSICAL HEALTH INTERFACE
- * Focuses on active management of physical stats.
- */
-const PhysicalScreen = () => (
-  <div className="space-y-6 animate-fade-in">
-    <div className="flex justify-between items-center">
-      <h2 className="text-2xl font-bold text-slate-800">Physical Activity</h2>
-      <div className="bg-slate-100 p-2 rounded-full">
-        <Settings size={20} className="text-slate-600" />
-      </div>
-    </div>
-
-    {/* Activity Graph Simulation (CSS Bar Chart) */}
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="font-semibold text-slate-700">Steps This Week</h3>
-        <span className="text-emerald-600 text-sm font-bold bg-emerald-50 px-2 py-1 rounded">Avg: 8,432</span>
-      </div>
-      <div className="flex items-end justify-between h-32 space-x-2">
-        {[40, 65, 50, 85, 60, 95, 70].map((h, i) => (
-          <div key={i} className="flex flex-col items-center flex-1 group">
-             <div 
-               className={`w-full rounded-t-lg transition-all duration-500 ${i === 5 ? 'bg-emerald-500' : 'bg-slate-200 group-hover:bg-emerald-300'}`} 
-               style={{ height: `${h}%` }}
-             ></div>
-             <span className="text-xs text-slate-400 mt-2">{['S','M','T','W','T','F','S'][i]}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-
-    {/* Vitals List */}
-    <div className="space-y-3">
-      <h3 className="font-semibold text-slate-700">Today's Vitals</h3>
-      
-      {[
-        { icon: Heart, color: 'rose', label: 'Heart Rate', value: '72 bpm', status: 'Normal' },
-        { icon: Droplets, color: 'blue', label: 'Hydration', value: '1.2 L', status: '800ml to go' },
-        { icon: Flame, color: 'orange', label: 'Active Energy', value: '450 kcal', status: 'On Track' },
-      ].map((item, idx) => (
-        <div key={idx} className="bg-white p-4 rounded-xl border border-slate-100 flex items-center justify-between shadow-sm">
-          <div className="flex items-center space-x-4">
-            <div className={`p-3 rounded-full bg-${item.color}-100 text-${item.color}-500`}>
-              <item.icon size={20} />
-            </div>
-            <div>
-              <p className="font-semibold text-slate-800">{item.label}</p>
-              <p className="text-xs text-slate-500">{item.status}</p>
-            </div>
-          </div>
-          <span className="text-lg font-bold text-slate-700">{item.value}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-/**
- * 3. MENTAL WELLNESS INTERFACE (Audio/Visual Tech)
- * Uses Canvas API for breathing visualization.
- */
-const MentalScreen = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const canvasRef = useRef(null);
-  const animationRef = useRef(null);
-  
-  // Audio Refs
-  const audioCtxRef = useRef(null);
-  const oscillatorRef = useRef(null);
-  const gainNodeRef = useRef(null);
-
-  // Handle Audio Logic
-  const toggleAudio = () => {
-    if (!isPlaying) {
-      // Initialize Audio Context on user gesture
-      const AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new AudioContext();
-      }
-      const ctx = audioCtxRef.current;
-
-      // Resume context if suspended (browser policy)
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
-
-      // Create Oscillator (Sound Source)
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      // Configure Sound: 174 Hz (Solfeggio frequency for stress)
-      osc.type = 'sine'; 
-      osc.frequency.setValueAtTime(174, ctx.currentTime);
-
-      // Connect nodes: Oscillator -> Gain -> Speakers
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      // Smooth Fade In
-      gain.gain.setValueAtTime(0, ctx.currentTime);
-      gain.gain.linearRampToValueAtTime(0.15, ctx.currentTime + 2); // Low volume (0.15)
-
-      osc.start();
-      
-      oscillatorRef.current = osc;
-      gainNodeRef.current = gain;
-      setIsPlaying(true);
-    } else {
-      // Smooth Fade Out
-      const ctx = audioCtxRef.current;
-      const gain = gainNodeRef.current;
-      const osc = oscillatorRef.current;
-
-      if (gain && ctx) {
-        gain.gain.cancelScheduledValues(ctx.currentTime);
-        gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
-        gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1);
-
-        setTimeout(() => {
-          if (osc) {
-            osc.stop();
-            osc.disconnect();
-          }
-        }, 1000);
-      }
-      setIsPlaying(false);
-    }
+  // Navigation Helpers
+  const goHome = () => {
+    setCurrentScreen(1);
+    setHealthStatus(null); 
+    setUserData({ weight: '', height: '', steps: '' });
   };
+  const goToInput = () => setCurrentScreen(2);
+  const goToVisual = () => setCurrentScreen(4);
+  const goToAudio = () => setCurrentScreen(5);
 
-  // Cleanup audio on unmount
-  useEffect(() => {
-    return () => {
-      if (oscillatorRef.current) {
-        try { oscillatorRef.current.stop(); } catch(e){}
-        oscillatorRef.current.disconnect();
-      }
-      if (audioCtxRef.current) {
-        audioCtxRef.current.close();
-      }
-    };
-  }, []);
+  // Logic for Health Analysis
+  const analyzeHealth = () => {
+    const w = parseFloat(userData.weight);
+    const h = parseFloat(userData.height) / 100; // convert cm to m
+    const s = parseInt(userData.steps);
 
-  useEffect(() => {
-    if (!isPlaying) {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-      return;
+    if (!w || !h || !s) return;
+
+    const bmi = w / (h * h);
+    let status = 'Healthy';
+    let message = 'Your metrics are within the optimal range.';
+    let color = 'green';
+
+    if (bmi > 25 || s < 5000) {
+      status = 'Needs Attention';
+      message = 'Consider increasing daily steps or managing diet.';
+      color = 'orange';
     }
 
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    let time = 0;
-
-    const animate = () => {
-      time += 0.02;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      
-      // Simulating a breathing bloom effect
-      const radius = 50 + Math.sin(time) * 20; 
-      const alpha = 0.5 + Math.sin(time) * 0.2;
-
-      // Outer Glow
-      const gradient = ctx.createRadialGradient(centerX, centerY, radius * 0.5, centerX, centerY, radius * 2);
-      gradient.addColorStop(0, `rgba(99, 102, 241, ${alpha})`); // Indigo
-      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius * 2, 0, Math.PI * 2);
-      ctx.fillStyle = gradient;
-      ctx.fill();
-
-      // Core Circle
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.fillStyle = '#6366f1';
-      ctx.fill();
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    animate();
-
-    return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    };
-  }, [isPlaying]);
-
-  return (
-    <div className="h-full flex flex-col animate-fade-in relative overflow-hidden rounded-3xl bg-slate-900 text-white p-6">
-      {/* Background Ambience */}
-      <div className="absolute inset-0 bg-gradient-to-b from-indigo-900 to-slate-900 z-0"></div>
-      
-      <div className="relative z-10 flex flex-col h-full justify-between items-center py-6">
-        <div className="text-center">
-          <h2 className="text-2xl font-light tracking-wide">Deep Focus</h2>
-          <p className="text-indigo-200 text-sm mt-1">Audioscape & Breathing</p>
-        </div>
-
-        {/* Visualizer Canvas */}
-        <div className="relative w-64 h-64 flex items-center justify-center">
-          <canvas ref={canvasRef} width={300} height={300} className="absolute inset-0" />
-          {!isPlaying && (
-            <div className="w-32 h-32 rounded-full bg-indigo-500/20 border border-indigo-500/50 flex items-center justify-center animate-pulse">
-               <span className="text-xs text-indigo-300">Tap Play</span>
-            </div>
-          )}
-        </div>
-
-        {/* Controls */}
-        <div className="w-full space-y-8">
-           <div className="flex justify-between text-xs text-indigo-300 px-4">
-             <span>01:20</span>
-             <span>10:00</span>
-           </div>
-           {/* Progress Bar */}
-           <div className="w-full bg-slate-700 h-1.5 rounded-full overflow-hidden">
-             <div className="bg-indigo-500 h-full w-1/4 rounded-full"></div>
-           </div>
-
-           <div className="flex items-center justify-center space-x-10">
-             <button className="text-indigo-200 hover:text-white"><Settings size={20}/></button>
-             <button 
-               onClick={toggleAudio}
-               className="w-16 h-16 bg-white text-indigo-900 rounded-full flex items-center justify-center shadow-lg hover:scale-105 transition-transform"
-             >
-               {isPlaying ? <Pause fill="currentColor" /> : <Play fill="currentColor" className="ml-1" />}
-             </button>
-             <button className="text-indigo-200 hover:text-white"><Wind size={20}/></button>
-           </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/**
- * 4. COMMUNITY INTERFACE
- * Social support for community resilience.
- */
-const CommunityScreen = () => (
-  <div className="space-y-6 animate-fade-in">
-    <div className="flex justify-between items-center">
-      <h2 className="text-2xl font-bold text-slate-800">Community</h2>
-      <button className="text-emerald-600 font-semibold text-sm">Find Groups</button>
-    </div>
-
-    {/* Monthly Challenge */}
-    <div className="bg-orange-50 border border-orange-100 p-5 rounded-2xl flex items-center space-x-4">
-      <div className="bg-orange-500 text-white p-3 rounded-xl shadow-orange-200 shadow-lg">
-        <Award size={24} />
-      </div>
-      <div className="flex-1">
-        <h3 className="font-bold text-slate-800">10k Steps Challenge</h3>
-        <p className="text-xs text-slate-500 mt-1">2,403 Participants • 3 Days left</p>
-        <div className="w-full bg-orange-200 h-2 rounded-full mt-3">
-          <div className="bg-orange-500 h-2 rounded-full w-3/4"></div>
-        </div>
-      </div>
-    </div>
-
-    {/* Feed */}
-    <div className="space-y-4">
-      <h3 className="font-semibold text-slate-700">Recent Activity</h3>
-      {[
-        { name: "Sarah J.", action: "completed a 5km Run", time: "2m ago", likes: 12 },
-        { name: "Mike T.", action: "reached a Meditation goal", time: "1h ago", likes: 24 },
-        { name: "Local Walking Group", action: "posted a new event", time: "3h ago", likes: 8 },
-      ].map((post, i) => (
-        <div key={i} className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-          <div className="flex items-center space-x-3 mb-2">
-            <div className="w-8 h-8 rounded-full bg-slate-200"></div>
-            <div>
-              <p className="text-sm font-medium text-slate-800"><span className="font-bold">{post.name}</span> {post.action}</p>
-              <p className="text-xs text-slate-400">{post.time}</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4 text-slate-400 text-sm mt-3 border-t border-slate-50 pt-2">
-             <span className="flex items-center space-x-1 hover:text-red-500 cursor-pointer transition-colors"><Heart size={14} /> <span>{post.likes}</span></span>
-             <span className="hover:text-blue-500 cursor-pointer transition-colors">Comment</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-/**
- * 5. PROFILE & INSIGHTS INTERFACE
- * Long-term management and personal settings.
- */
-const ProfileScreen = () => (
-  <div className="space-y-6 animate-fade-in">
-    <div className="flex flex-col items-center pt-4">
-      <div className="w-24 h-24 rounded-full border-4 border-emerald-500 p-1 mb-4">
-         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" alt="User" className="w-full h-full rounded-full bg-slate-100" />
-      </div>
-      <h2 className="text-2xl font-bold text-slate-800">Alex Morgan</h2>
-      <p className="text-slate-500">Member since 2023</p>
-    </div>
-
-    {/* Menu Items */}
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-      {[
-        { label: "My Health Data", icon: Activity, color: "emerald" },
-        { label: "Goals & Targets", icon: Award, color: "orange" },
-        { label: "Connected Devices", icon: Settings, color: "blue" },
-        { label: "Notifications", icon: Bell, color: "purple" }
-      ].map((item, i) => (
-        <div key={i} className="flex items-center justify-between p-4 border-b border-slate-50 last:border-0 hover:bg-slate-50 cursor-pointer transition-colors">
-          <div className="flex items-center space-x-4">
-            <div className={`p-2 rounded-lg bg-${item.color}-50 text-${item.color}-600`}>
-              <item.icon size={18} />
-            </div>
-            <span className="font-medium text-slate-700">{item.label}</span>
-          </div>
-          <ChevronRight size={18} className="text-slate-300" />
-        </div>
-      ))}
-    </div>
-
-    {/* Report Generation (SDG3 Requirement: Active Management) */}
-    <button className="w-full bg-slate-800 text-white py-4 rounded-xl font-semibold shadow-lg hover:bg-slate-700 transition-colors flex items-center justify-center space-x-2">
-       <Activity size={18} />
-       <span>Generate Monthly Health Report</span>
-    </button>
-  </div>
-);
-
-
-// --- Main App Container ---
-
-export default function WHealthApp() {
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  const renderContent = () => {
-    switch(activeTab) {
-      case 'dashboard': return <DashboardScreen setActiveTab={setActiveTab} />;
-      case 'physical': return <PhysicalScreen />;
-      case 'mental': return <MentalScreen />;
-      case 'community': return <CommunityScreen />;
-      case 'profile': return <ProfileScreen />;
-      default: return <DashboardScreen />;
-    }
+    setHealthStatus({ bmi: bmi.toFixed(1), status, message, color });
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center font-sans text-slate-900 p-4">
-      {/* Mobile Frame Simulation */}
-      <div className="w-full max-w-md h-[800px] bg-white rounded-[2.5rem] shadow-2xl overflow-hidden border-8 border-slate-800 relative flex flex-col">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center py-6 px-4 font-sans text-slate-900">
+      
+      {/* Global Header */}
+      <div className="relative w-full max-w-md flex items-center justify-center mb-4">
+        {currentScreen !== 1 && (
+          <button 
+            onClick={goHome} 
+            className="absolute left-0 p-2 text-slate-400 hover:text-blue-600 transition-colors"
+          >
+            <ArrowLeft size={20} />
+          </button>
+        )}
+        <h1 className="text-xl font-bold text-slate-900">
+          W-Health
+        </h1>
+      </div>
+
+      {/* Screen Router */}
+      <div className="w-full max-w-md animate-fade-in flex-1 flex flex-col justify-center">
         
-        {/* Notch / Status Bar */}
-        <div className="bg-white px-6 pt-3 pb-2 flex justify-between items-center text-xs font-semibold text-slate-800 z-20">
-          <span>9:41</span>
-          <div className="w-20 h-5 bg-black rounded-full absolute left-1/2 -translate-x-1/2 top-4"></div>
-          <div className="flex space-x-1">
-            <div className="w-4 h-2.5 bg-slate-800 rounded-sm"></div>
-            <div className="w-0.5 h-2.5 bg-slate-800 rounded-sm"></div>
+        {/* SCREEN 1: HUB (Main Menu) */}
+        {currentScreen === 1 && (
+          <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center">
+            <h2 className="text-xl font-bold mb-2">Welcome Back</h2>
+            <p className="text-slate-500 mb-6">Select a module to begin your daily check-in.</p>
+            
+            <div className="grid gap-3">
+              <MenuButton 
+                icon={User} 
+                title="Health Check-In" 
+                subtitle="Input stats & Analyze BMI" 
+                onClick={goToInput} 
+              />
+              <MenuButton 
+                icon={Activity} 
+                title="Live Vitals" 
+                subtitle="View real-time sensor data" 
+                onClick={goToVisual} 
+              />
+              <MenuButton 
+                icon={Volume2} 
+                title="Wellness Audio Guide" 
+                subtitle="Listen to daily motivational briefing" 
+                onClick={goToAudio} 
+              />
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* Scrollable Content Area */}
-        <div className="flex-1 overflow-y-auto no-scrollbar relative bg-slate-50">
-           <div className="p-5 pb-24 min-h-full">
-             {renderContent()}
-           </div>
-        </div>
+        {/* SCREEN 2: INPUT & ANALYSIS (Compact) */}
+        {currentScreen === 2 && (
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 transition-all duration-300">
+            <h2 className="text-lg font-bold mb-4 text-center">Your Daily Metrics</h2>
+            <div className="space-y-3 max-w-sm mx-auto">
+              {/* Row for Weight/Height */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Weight (kg)</label>
+                  <input 
+                    type="number" 
+                    value={userData.weight}
+                    onChange={e => setUserData({...userData, weight: e.target.value})}
+                    className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                    placeholder="70"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">Height (cm)</label>
+                  <input 
+                    type="number" 
+                    value={userData.height}
+                    onChange={e => setUserData({...userData, height: e.target.value})}
+                    className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                    placeholder="175"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 mb-1">Daily Steps</label>
+                <input 
+                  type="number" 
+                  value={userData.steps}
+                  onChange={e => setUserData({...userData, steps: e.target.value})}
+                  className="w-full p-2 text-sm border border-slate-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                  placeholder="5400"
+                />
+              </div>
+              
+              <button 
+                onClick={analyzeHealth}
+                className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200 mt-2"
+              >
+                Analyze My Health
+              </button>
+            </div>
 
-        {/* Bottom Navigation Bar */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-100 px-6 py-4 flex justify-between items-center z-30">
-          <NavIcon icon={Activity} label="Home" id="dashboard" activeTab={activeTab} setTab={setActiveTab} />
-          <NavIcon icon={Heart} label="Move" id="physical" activeTab={activeTab} setTab={setActiveTab} />
-          {/* Central Action Button */}
-          <div className="relative -top-6">
-            <button 
-              onClick={() => setActiveTab('mental')}
-              className={`w-14 h-14 rounded-full flex items-center justify-center shadow-lg transition-all duration-300 ${activeTab === 'mental' ? 'bg-indigo-600 ring-4 ring-indigo-100' : 'bg-slate-800'}`}
-            >
-              <Wind className="text-white" size={24} />
-            </button>
+            {/* Compact Inline Results */}
+            {healthStatus && (
+              <div className="mt-4 pt-4 border-t border-slate-100 animate-fade-in text-center">
+                 <div className="flex items-center justify-center gap-2 mb-2">
+                    <div className={`p-1.5 rounded-full ${
+                      healthStatus.color === 'green' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
+                    }`}>
+                      {healthStatus.color === 'green' ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+                    </div>
+                    <h3 className="text-base font-bold text-slate-900">{healthStatus.status}</h3>
+                 </div>
+                
+                <p className="text-xs text-slate-500 mb-4 max-w-xs mx-auto">{healthStatus.message}</p>
+
+                <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
+                  <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <div className="text-[10px] text-slate-400 uppercase font-bold">Your BMI</div>
+                    <div className="text-base font-bold text-slate-800">{healthStatus.bmi}</div>
+                  </div>
+                  <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
+                    <div className="text-[10px] text-slate-400 uppercase font-bold">Activity</div>
+                    <div className="text-base font-bold text-slate-800">{userData.steps} <span className="text-[10px] font-normal text-slate-400">steps</span></div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          <NavIcon icon={Users} label="Social" id="community" activeTab={activeTab} setTab={setActiveTab} />
-          <NavIcon icon={User} label="You" id="profile" activeTab={activeTab} setTab={setActiveTab} />
-        </div>
+        )}
+
+        {/* SCREEN 4: VISUAL (Compact) */}
+        {currentScreen === 4 && <VisualSection />}
+
+        {/* SCREEN 5: AUDIO */}
+        {currentScreen === 5 && <AudioSection />}
 
       </div>
-      
-      {/* Global Styles for Animations */}
-      <style>{`
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
-      `}</style>
     </div>
   );
 }
 
-const NavIcon = ({ icon: Icon, label, id, activeTab, setTab }) => {
-  const isActive = activeTab === id;
+// --- SUB-COMPONENTS ---
+
+const MenuButton = ({ icon: Icon, title, subtitle, onClick }) => (
+  <button 
+    onClick={onClick}
+    className="w-full flex items-center p-4 bg-white border border-slate-100 rounded-xl hover:border-blue-200 hover:shadow-md transition-all group"
+  >
+    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-colors shrink-0">
+      <Icon size={20} />
+    </div>
+    <div className="ml-4 text-left flex-1">
+      <h3 className="font-bold text-slate-800 text-sm">{title}</h3>
+      <p className="text-xs text-slate-500">{subtitle}</p>
+    </div>
+    <ChevronRight size={18} className="text-slate-300 group-hover:text-blue-600" />
+  </button>
+);
+
+const VisualSection = () => {
+  const canvasRef = useRef(null);
+  const [vitals, setVitals] = useState({ bpm: 72, spo2: 98, stress: 'Low' });
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVitals(prev => ({
+        bpm: 72 + Math.floor(Math.random() * 5 - 2),
+        spo2: 98 + Math.floor(Math.random() * 2 - 1),
+        stress: prev.bpm > 73 ? 'Low' : 'Normal'
+      }));
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let animationId;
+    let offset = 0;
+
+    const draw = () => {
+      const width = canvas.width = canvas.offsetWidth;
+      const height = canvas.height = canvas.offsetHeight;
+      ctx.clearRect(0, 0, width, height);
+      ctx.beginPath();
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 3;
+      for (let x = 0; x < width; x++) {
+        const y = height / 2 + 
+          Math.sin((x + offset) * 0.05) * 10 + 
+          (Math.sin((x + offset) * 0.2) > 0.9 ? -40 : 0);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      offset += 2;
+      animationId = requestAnimationFrame(draw);
+    };
+    draw();
+    return () => cancelAnimationFrame(animationId);
+  }, []);
+
   return (
-    <button 
-      onClick={() => setTab(id)}
-      className={`flex flex-col items-center space-y-1 transition-colors ${isActive ? 'text-emerald-600' : 'text-slate-400 hover:text-slate-600'}`}
-    >
-      <Icon size={24} strokeWidth={isActive ? 2.5 : 2} />
-      <span className="text-[10px] font-medium">{label}</span>
-    </button>
+    <div className="flex flex-col items-center w-full">
+      <div className="w-full bg-white p-5 rounded-2xl shadow-sm border border-slate-200 mb-4">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="text-lg font-bold">Live Sensor Feed</h2>
+          <div className="flex items-center space-x-2">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-[10px] font-bold text-green-600 uppercase">Connected</span>
+          </div>
+        </div>
+        
+        {/* Fixed Height Canvas */}
+        <div className="relative w-full bg-slate-100 rounded-xl overflow-hidden shadow-inner h-40 flex items-center justify-center group border border-slate-200 mb-4">
+          <canvas ref={canvasRef} className="w-full h-full" />
+          <div className="absolute inset-0 opacity-10 pointer-events-none" 
+               style={{backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '20px 20px'}}>
+          </div>
+        </div>
+
+        {/* Compact Dashboard */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-red-50 p-3 rounded-xl border border-red-100 flex flex-col items-center">
+            <div className="flex items-center space-x-1 text-red-500 mb-1">
+              <Heart size={14} fill="currentColor" />
+              <span className="text-[10px] font-bold uppercase">HR</span>
+            </div>
+            <div className="text-xl font-bold text-slate-800">{vitals.bpm}</div>
+            <div className="text-[10px] text-slate-500">Normal</div>
+          </div>
+
+          <div className="bg-blue-50 p-3 rounded-xl border border-blue-100 flex flex-col items-center">
+            <div className="flex items-center space-x-1 text-blue-500 mb-1">
+              <Droplets size={14} />
+              <span className="text-[10px] font-bold uppercase">SpO2</span>
+            </div>
+            <div className="text-xl font-bold text-slate-800">{vitals.spo2}%</div>
+            <div className="text-[10px] text-slate-500">Optimal</div>
+          </div>
+
+          <div className="bg-purple-50 p-3 rounded-xl border border-purple-100 flex flex-col items-center">
+            <div className="flex items-center space-x-1 text-purple-500 mb-1">
+              <Zap size={14} />
+              <span className="text-[10px] font-bold uppercase">Stress</span>
+            </div>
+            <div className="text-xl font-bold text-slate-800">{vitals.stress}</div>
+            <div className="text-[10px] text-slate-500">Stable</div>
+          </div>
+        </div>
+      </div>
+      <p className="text-slate-500 text-[10px] italic text-center max-w-xl">
+        Data simulated from local sensor API. Measurements update every 2 seconds.
+      </p>
+    </div>
+  );
+};
+
+const AudioSection = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [elapsed, setElapsed] = useState(0); 
+  const [duration, setDuration] = useState(88); // Updated to 1:28 (88 seconds)
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const speechRef = useRef(null); // Flag to allow playing
+  const elapsedRef = useRef(0); // Ref to track elapsed time for event callbacks
+
+  // Script
+  const scriptSentences = [
+    "Welcome to W-Health, your integrated companion for sustainable well-being.",
+    "As a dedicated tool for the United Nations Sustainable Development Goal 3, our mission is to ensure healthy lives and promote well-being for all at all ages.",
+    "In a modern world that never stops, your health requires more than just occasional check-ups; it demands consistent, informed, and proactive action every single day.",
+    "W-Health bridges the critical gap between your personal biological data and the vital support systems within your local community.",
+    "By diligently tracking metrics like your heart rate, step count, and daily energy, you are taking powerful ownership of your physical journey.",
+    "By engaging with these daily briefings and taking moments for mindfulness, you are actively nurturing your mental resilience against stress.",
+    "This data doesn't just help you; it contributes to a larger picture of community health, enabling faster local emergency responses and smarter resource allocation.",
+    "Remember that every single step you take is a meaningful contribution to a healthier, more sustainable world.",
+    "Take a moment now to breathe deeply, center yourself, and appreciate the significant progress you have made today.",
+    "Let's continue building a healthier future, together."
+  ];
+
+  // Voice Selector Logic
+  const getCalmVoice = () => {
+    const voices = window.speechSynthesis.getVoices();
+    return voices.find(v => v.name.includes("Google US English")) || 
+           voices.find(v => v.name.includes("Samantha")) || 
+           voices.find(v => v.name.includes("Female")) || 
+           voices[0];
+  };
+
+  // Sequential Speech Logic
+  const speakNextSentence = (index) => {
+    // If we've finished the script
+    if (index >= scriptSentences.length) {
+      setIsPlaying(false);
+      setElapsed(0); // Reset timer UI
+      elapsedRef.current = 0;
+      setCurrentIndex(0); // Ready for restart
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(scriptSentences[index]);
+    const voice = getCalmVoice();
+    if (voice) utterance.voice = voice;
+    
+    utterance.rate = 0.9;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    utterance.onend = () => {
+      // If we are still in "playing" mode, schedule the next sentence
+      if (speechRef.current) {
+        setTimeout(() => {
+          if (speechRef.current) {
+            setCurrentIndex(index + 1);
+            speakNextSentence(index + 1);
+          }
+        }, 500);
+      }
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const toggleSession = () => {
+    if (isPlaying) {
+      // PAUSE: Use browser pause to keep place
+      window.speechSynthesis.pause();
+      speechRef.current = false;
+      setIsPlaying(false);
+    } else {
+      // RESUME or START
+      
+      // If we are finished (index 0, elapsed 0), start fresh
+      if (currentIndex === 0 && elapsed === 0) {
+         setDuration(88); // Reset estimate to 1:28
+         speechRef.current = true;
+         window.speechSynthesis.cancel(); // Clear any debris
+         speakNextSentence(0);
+         setIsPlaying(true);
+      } 
+      // If we are paused in the middle
+      else {
+         speechRef.current = true;
+         window.speechSynthesis.resume();
+         setIsPlaying(true);
+         
+         // Fallback: If resume() doesn't trigger speech (e.g. paused in silence gap)
+         setTimeout(() => {
+            if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending && speechRef.current) {
+               // We were likely in a gap, force next sentence
+               speakNextSentence(currentIndex);
+            }
+         }, 100);
+      }
+    }
+  };
+
+  // Timer: High-frequency update for smoothness
+  useEffect(() => {
+    let timer;
+    if (isPlaying) {
+      timer = setInterval(() => {
+        setElapsed(prev => {
+          const newTime = prev + 0.05; // 50ms increments
+          elapsedRef.current = newTime;
+          return newTime;
+        });
+      }, 50);
+    }
+    return () => clearInterval(timer);
+  }, [isPlaying]);
+
+  // Cleanup
+  useEffect(() => {
+    window.speechSynthesis.getVoices(); 
+    return () => {
+      speechRef.current = false;
+      window.speechSynthesis.cancel();
+    }
+  }, []);
+
+  const formatTime = (seconds) => {
+    const totalSeconds = Math.floor(seconds);
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // Calculate percentage based on TIME for smoothness
+  const progressPercent = Math.min((elapsed / duration) * 100, 100);
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="w-full bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+        <h2 className="text-lg font-bold mb-6 text-center">Health Briefing</h2>
+        
+        <div className="w-full flex items-center gap-3 mb-4">
+          <button 
+            onClick={toggleSession}
+            className={`w-12 h-12 rounded-full flex items-center justify-center text-white transition-all shadow-lg shrink-0 ${
+              isPlaying ? 'bg-orange-500 shadow-orange-200' : 'bg-blue-600 hover:bg-blue-700 shadow-blue-200'
+            }`}
+          >
+            {isPlaying ? <Pause size={20} fill="currentColor" /> : <Play size={20} fill="currentColor" className="ml-1" />}
+          </button>
+          
+          <div className="flex-1 flex flex-col gap-1">
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden w-full">
+              <div 
+                className={`h-full transition-all duration-100 ease-linear ${isPlaying ? 'bg-orange-500' : 'bg-blue-600'}`}
+                style={{ width: `${progressPercent}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-[10px] font-mono text-slate-500">
+               <span>{formatTime(elapsed)}</span>
+               <span>{formatTime(duration)}</span>
+            </div>
+          </div>
+          <Mic size={18} className={`shrink-0 ${isPlaying ? 'text-orange-500 animate-pulse' : 'text-slate-400'}`} />
+        </div>
+
+        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-xs leading-relaxed text-slate-600 italic text-center">
+          "W-Health: Your integrated companion for SDG3, tracking vitals and empowering community well-being."
+        </div>
+      </div>
+    </div>
   );
 };
